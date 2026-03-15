@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ person }}'s Entries - Group Expense Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h2>Group Expense Manager</h2>
+            <nav>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('add_expense') }}">Add Expense</a>
+                <a href="{{ url_for('all_entries') }}">All Entries</a>
+                <a href="{{ url_for('totals') }}">Totals</a>
+                <a href="{{ url_for('statistics') }}">Statistics</a>
+                <a href="{{ url_for('export_all_pdf') }}">Export Group PDF</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>{{ person }}'s Expenses</h1>
+                <div style="display: flex; gap: 10px;">
+                    <a href="{{ url_for('export_individual_pdf', person=person) }}" class="export-pdf-btn">Export PDF</a>
+                    <a href="{{ url_for('totals') }}" class="export-pdf-btn" style="background: #3498db;">Back to Totals</a>
+                </div>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <!-- Summary Card -->
+            <div class="cards-container" style="margin-bottom: 20px;">
+                <div class="card total-card" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
+                    <h3>Total Expenses</h3>
+                    <div class="amount">₹{{ "%.2f"|format(total) }}</div>
+                    <p>Total Transactions: {{ expenses|length }}</p>
+                </div>
+                
+                <div class="card">
+                    <h3>Average per Transaction</h3>
+                    <div class="amount small">₹{{ "%.2f"|format(total/expenses|length) if expenses else 0 }}</div>
+                    <p>For {{ person }}</p>
+                </div>
+            </div>
+            
+            <!-- Monthly Bar Graph -->
+            {% if monthly_totals %}
+            <div class="graph-container">
+                <h3>Monthly Expense Distribution</h3>
+                <div class="bar-graph">
+                    {% set max_monthly = monthly_totals.values()|max or 1 %}
+                    {% for month, amount in monthly_totals.items() %}
+                    <div class="bar-item">
+                        <span class="bar-label">{{ month }}</span>
+                        <div class="bar-wrapper">
+                            {% set percentage = (amount / max_monthly * 100) %}
+                            <div class="bar-fill" style="width: {{ percentage }}%; background: linear-gradient(90deg, #3498db, #2980b9);">
+                                {% if percentage > 15 %}
+                                    ₹{{ "%.0f"|format(amount) }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <span class="bar-value">₹{{ "%.2f"|format(amount) }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Entries Table -->
+            <div class="entries-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Amount</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ expense.date }}</td>
+                            <td>{{ expense.time }}</td>
+                            <td>₹{{ "%.2f"|format(expense.amount) }}</td>
+                            <td>{{ expense.purpose }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
+                            <td><strong>₹{{ "%.2f"|format(total) }}</strong></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

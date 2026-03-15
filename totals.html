@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totals - Group Expense Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h2>Group Expense Manager</h2>
+            <nav>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('add_expense') }}">Add Expense</a>
+                <a href="{{ url_for('all_entries') }}">All Entries</a>
+                <a href="{{ url_for('totals') }}" class="active">Totals</a>
+                <a href="{{ url_for('statistics') }}">Statistics</a>
+                <a href="{{ url_for('export_all_pdf') }}">Export Group PDF</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>Expense Totals</h1>
+                <a href="{{ url_for('export_all_pdf') }}" class="export-pdf-btn">Export Group PDF</a>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="totals-container">
+                <div class="group-total-card">
+                    <h2>Group Total Spending</h2>
+                    <div class="group-amount">₹{{ "%.2f"|format(group_total) }}</div>
+                    <p style="margin-top: 10px;">Total Transactions: {{ total_transactions }}</p>
+                </div>
+                
+                <div class="individual-totals">
+                    <h2>Individual Totals</h2>
+                    <table class="totals-table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Total Amount</th>
+                                <th>Percentage</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in members %}
+                            <tr>
+                                <td><strong>{{ member }}</strong></td>
+                                <td>₹{{ "%.2f"|format(individual_totals[member].amount) }}</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <span>{{ "%.1f"|format(individual_totals[member].percentage) }}%</span>
+                                        <div style="width: 50px; height: 8px; background: #f0f0f0; border-radius: 4px;">
+                                            <div style="width: {{ individual_totals[member].percentage }}%; height: 100%; background: #27ae60; border-radius: 4px;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('individual_entries', person=member) }}" class="view-link">View</a>
+                                    <a href="{{ url_for('export_individual_pdf', person=member) }}" class="export-link">PDF</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

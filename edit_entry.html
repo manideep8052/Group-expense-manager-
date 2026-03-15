@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Entry - Group Expense Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h2>Group Expense Manager</h2>
+            <nav>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('add_expense') }}">Add Expense</a>
+                <a href="{{ url_for('all_entries') }}" class="active">All Entries</a>
+                <a href="{{ url_for('totals') }}">Totals</a>
+                <a href="{{ url_for('export_all_pdf') }}">Export Group PDF</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>Edit Expense</h1>
+            </div>
+            
+            <div class="form-container">
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="person">Select Member:</label>
+                        <select name="person" id="person" required>
+                            {% for member in members %}
+                            <option value="{{ member }}" {% if member == expense.person %}selected{% endif %}>{{ member }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amount">Amount (₹):</label>
+                        <input type="number" step="0.01" name="amount" id="amount" value="{{ expense.amount }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="purpose">Purpose:</label>
+                        <input type="text" name="purpose" id="purpose" value="{{ expense.purpose }}" required>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Update Expense</button>
+                    <a href="{{ url_for('all_entries') }}" class="cancel-btn">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

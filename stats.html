@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics - Group Expense Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h2>Group Expense Manager</h2>
+            <nav>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('add_expense') }}">Add Expense</a>
+                <a href="{{ url_for('all_entries') }}">All Entries</a>
+                <a href="{{ url_for('totals') }}">Totals</a>
+                <a href="{{ url_for('statistics') }}" class="active">Statistics</a>
+                <a href="{{ url_for('export_all_pdf') }}">Export Group PDF</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>Monthly Statistics</h1>
+            </div>
+            
+            {% for month, stats in monthly_stats.items() %}
+            <div class="graph-container">
+                <h3>Month: {{ month }}</h3>
+                
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-label">Monthly Total</div>
+                        <div class="stat-value">₹{{ "%.2f"|format(stats.total) }}</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Transactions</div>
+                        <div class="stat-value">{{ stats.count }}</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Average</div>
+                        <div class="stat-value">₹{{ "%.2f"|format(stats.total/stats.count) if stats.count > 0 else 0 }}</div>
+                    </div>
+                </div>
+                
+                <div class="bar-graph">
+                    {% for member in members %}
+                        {% set amount = stats.members.get(member, 0) %}
+                        <div class="bar-item">
+                            <span class="bar-label">{{ member }}</span>
+                            <div class="bar-wrapper">
+                                {% set max_amount = stats.members.values()|max or 1 %}
+                                {% set percentage = (amount / max_amount * 100) if max_amount > 0 else 0 %}
+                                <div class="bar-fill" style="width: {{ percentage }}%;">
+                                    {% if percentage > 20 %}
+                                        ₹{{ "%.0f"|format(amount) }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <span class="bar-value">₹{{ "%.2f"|format(amount) }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="graph-container">
+                <p style="text-align: center; padding: 40px;">No statistics available yet</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
